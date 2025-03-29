@@ -39,28 +39,33 @@ yarn install @randajan/revert
 ```js
 import { Revertable } from "@randajan/revert/async";
 
-const task = new Revertable({ pass: "reduce" });
+const task = new Revertable({ logger:(msg) => log2.push(msg) })
+  .pushNamed("s1", (log) => log("do1"), "r1", (log) =>{ log("undo1"); throw new Error("rollback")})
+  .pushNamed("s2", (log) => log("do2"))
+  .pushNamed("s3", (log) => log("do3"), "r3", (log) => log("undo3"))
+  .pushNamed("s4", (log) => { log("do4"); throw new Error("main"); }, "r4", (log) => log("undo4"));
 
-task
-  .pushNamed(
-    "Step 1",
-    async (val, log) =>val + 1,
-    "Undo 1",
-    async (val, log) =>val - 1
-  )
-  .push(
-    async (val, log) => {
-      log("Step 2");
-      throw new Error("Something failed");
-    },
-    async (val, log) => {
-      log("Undo 2");
-      return val;
-    }
-  );
-
-const result = await task.run(0);
+const result = await task.run();
 console.log(result);
+```
+
+### 📈 Log Output Example
+
+```text
+↓ 1/4 [info] s1
+↓ 1/4 [info] do1
+↓ 2/4 [info] s2
+↓ 2/4 [info] do2
+↓ 3/4 [info] s3
+↓ 3/4 [info] do3
+↓ 4/4 [info] s4
+↓ 4/4 [info] do4
+─ 4/4 [error] main
+↑ 3/4 [info] r3
+↑ 3/4 [info] undo3
+↑ 1/4 [info] r1
+↑ 1/4 [info] undo1
+⤫ 1/4 [error] rolback
 ```
 
 ---

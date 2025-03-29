@@ -3,6 +3,7 @@ import { defaultLogFormat, verifyFn, verifyPassMode } from "../uni";
 import { revertable } from "./utils";
 
 export const wrapWithLogMsg = (passMode, msg, fn)=>{
+    if (!fn) { return; }
     return async (a1, a2, ...a)=>{
         await (passMode === "omit" ? a1 : a2)(msg);
         return fn(a1, a2, ...a);
@@ -29,7 +30,7 @@ export class Revertable extends Array {
     push(fwd, rwd) {
         super.push(Object.freeze({
             fwd:verifyFn("fwd", fwd, true),
-            rwd:verifyFn("rwd", rwd, true)
+            rwd:verifyFn("rwd", rwd)
         }));
         return this;
     }
@@ -38,8 +39,8 @@ export class Revertable extends Array {
         const { logger, passMode } = this;
         if (!logger) { throw new Error("pushNamed(...) requires opt.logger to be provided"); }
         return this.push(
-            wrapWithLogMsg(passMode, fwdName, fwd),
-            wrapWithLogMsg(passMode, rwdName, rwd)
+            wrapWithLogMsg(passMode, fwdName, verifyFn("fwd", fwd, true)),
+            wrapWithLogMsg(passMode, rwdName, verifyFn("rwd", rwd))
         )
     }
 
@@ -50,10 +51,12 @@ export class Revertable extends Array {
 
         return revertable(!omit ? value : undefined, length, async (value, dir, s, c)=>{
             const { fwd, rwd } = this[s-1];
+            const wd = dir ? fwd : rwd;
+            if (!wd) { return !omit ? value : undefined; }
             const a = [];
             if (!omit) { a.push(value); }
             if (logger) { a.push((msg, kind="info")=>logger(msg, kind, dir, s, c)); }
-            const r = await (dir ? fwd : rwd)(...a, s, c);
+            const r = await wd(...a, s, c);
             if (!omit) { return passMode == "keep" ? value : r; }
         }, onError);
     }

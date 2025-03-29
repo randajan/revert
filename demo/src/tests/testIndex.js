@@ -22,12 +22,13 @@ export async function testIndex() {
   console.log("▶ Test: Revertable performs rollback on failure");
 
   const log2 = [];
-  const r2 = new Revertable({ logger:(msg) => log2.push(msg) });
-  r2
-    .pushNamed("s1", (log) => log("do1"), "r1", (log) => log("undo1"))
-    .pushNamed("s2", (log) => { log("do2"); throw new Error("fail"); }, "r2", (log) => log("undo2"));
+  const task = new Revertable({ logger:(msg) => log2.push(msg) })
+    .pushNamed("s1", (log) => log("do1"), "r1", (log) =>{ log("undo1"); throw new Error("rollback")})
+    .pushNamed("s2", (log) => log("do2"))
+    .pushNamed("s3", (log) => log("do3"), "r3", (log) => log("undo3"))
+    .pushNamed("s4", (log) => { log("do4"); throw new Error("main"); }, "r4", (log) => log("undo4"));
 
-  const result2 = await r2.run();
+  const result2 = await task.run();
 //   assert.strictEqual(result2, false);
 //   assert.deepEqual(log2, [
 //     "step 1", "do1",
