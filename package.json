@@ -1,0 +1,58 @@
+{
+  "name": "@randajan/revert",
+  "version": "1.0.0",
+  "description": "A minimalist utility for running sequential steps with automatic rollback on failure.",
+  "repository": "randajan/revert",
+  "type": "module",
+  "main": "dist/cjs/sync/index.cjs",
+  "module": "dist/esm/sync/index.mjs",
+  "exports": {
+    "./sync": {
+      "import": "./dist/esm/sync/index.mjs",
+      "require": "./dist/cjs/sync/index.cjs"
+    },
+    "./sync/utils": {
+      "import": "./dist/esm/sync/utils.mjs",
+      "require": "./dist/cjs/sync/utils.cjs"
+    },
+    "./async": {
+      "import": "./dist/esm/async/index.mjs",
+      "require": "./dist/cjs/async/index.cjs"
+    },
+    "./async/utils": {
+      "import": "./dist/esm/async/utils.mjs",
+      "require": "./dist/cjs/async/utils.cjs"
+    }
+  },
+  "license": "MIT",
+  "peerDependencies": {},
+  "devDependencies": {
+    "@randajan/simple-lib": "^3.0.2"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "fetch",
+    "json",
+    "http",
+    "api",
+    "network",
+    "request",
+    "rest",
+    "ajax",
+    "wrapper",
+    "error-handling"
+  ],
+  "homepage": "https://github.com/randajan/revert",
+  "bugs": {
+    "url": "https://github.com/randajan/revert/issues"
+  },
+  "author": {
+    "name": "Jan Randa",
+    "email": "jnranda@gmail.com",
+    "url": "https://www.linkedin.com/in/randajan/"
+  }
+}
