@@ -3,8 +3,8 @@ import { testIndex } from "./tests/testIndex";
 
 
 (async ()=>{
-    await testUtils();
-    //await testIndex();
+    //await testUtils();
+    await testIndex();
 
 })().catch(err => {
     console.error("❌ Test failed:", err);

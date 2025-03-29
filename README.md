@@ -42,15 +42,11 @@ import { Revertable } from "@randajan/revert/async";
 const task = new Revertable({ pass: "reduce" });
 
 task
-  .push(
-    async (val, log) => {
-      log("Step 1");
-      return val + 1;
-    },
-    async (val, log) => {
-      log("Undo 1");
-      return val - 1;
-    }
+  .pushNamed(
+    "Step 1",
+    async (val, log) =>val + 1,
+    "Undo 1",
+    async (val, log) =>val - 1
   )
   .push(
     async (val, log) => {

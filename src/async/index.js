@@ -1,29 +1,20 @@
 
+import { defaultLogFormat, verifyFn, verifyPassMode } from "../uni";
 import { revertable } from "./utils";
 
-const _passes = ["omit", "keep", "reduce"];
-
-const verifyFn = (argMsg, fn, req=false)=>{
-    if (typeof fn === "function") { return fn; }
-    if (fn == null && !req) { return; }
-    throw new Error(`${argMsg} must be typeof function`);
+export const wrapWithLogMsg = (passMode, msg, fn)=>{
+    return async (a1, a2, ...a)=>{
+        await (passMode === "omit" ? a1 : a2)(msg);
+        return fn(a1, a2, ...a);
+    }
 }
-
-const defaultLogFormat = (kind, data, dir, s, c)=>{
-    const symbol = kind === "error" ? (dir ? "─" : "⤫") : (dir ? "↓" :"↑");
-    return (`${symbol} ${s}/${c} [${kind}] ${data?.message || data}`);
-};
 
 export class Revertable extends Array {
 
     constructor({logger, logFormat, pass="omit"}) {
         super();
 
-        if (!_passes.includes(pass)) {
-            throw new Error(`Option pass '${pass}' must be one of '${pass.join("', '")}'`);
-        }
-
-        Object.defineProperty(this, "pass", { value:pass });
+        Object.defineProperty(this, "passMode", { value:verifyPassMode(pass) });
 
         logger = verifyFn("Option logger", logger);
 
@@ -43,18 +34,27 @@ export class Revertable extends Array {
         return this;
     }
 
+    pushNamed(fwdName, fwd, rwdName, rwd) {
+        const { logger, passMode } = this;
+        if (!logger) { throw new Error("pushNamed(...) requires opt.logger to be provided"); }
+        return this.push(
+            wrapWithLogMsg(passMode, fwdName, fwd),
+            wrapWithLogMsg(passMode, rwdName, rwd)
+        )
+    }
+
     async run(value) {
-        const { logger, pass, length } = this;
-        const onError = logger ? (err, dir, s, c)=>{logger(err, "error", dir, s, c)} : undefined;
-        const omit = pass == "omit";
+        const { logger, passMode, length } = this;
+        const onError = logger ? (err, dir, s, c)=>logger(err, "error", dir, s, c) : undefined;
+        const omit = passMode == "omit";
 
         return revertable(!omit ? value : undefined, length, async (value, dir, s, c)=>{
             const { fwd, rwd } = this[s-1];
             const a = [];
             if (!omit) { a.push(value); }
-            if (logger) { a.push((msg, kind="info")=>{logger(msg, kind, dir, s, c)}); }
+            if (logger) { a.push((msg, kind="info")=>logger(msg, kind, dir, s, c)); }
             const r = await (dir ? fwd : rwd)(...a, s, c);
-            if (!omit) { return pass == "keep" ? value : r; }
+            if (!omit) { return passMode == "keep" ? value : r; }
         }, onError);
     }
 

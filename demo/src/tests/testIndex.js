@@ -6,11 +6,11 @@ export async function testIndex() {
   console.log("▶ Test: Revertable runs all steps (success)");
 
   const log = [];
-  const r1 = new Revertable({ logger:(msg) => log.push(msg) });
-  r1.push((log) => log("do1"), (log) => log("undo1"));
-  r1.push((log) => log("do2"), (log) => log("undo2"));
+  const r1 = new Revertable({ logger:(msg) => log.push(msg), pass:"keep" });
+  r1.pushNamed("s1", (v, log) => log("do1"), "r1", (v, log) => log("undo1"));
+  r1.pushNamed("s2", (v, log) => log("do2"), "r2", (v, log) => log("undo2"));
 
-  const result1 = await r1.run();
+  const result1 = await r1.run("x");
 //   assert.strictEqual(result1, true);
 //   assert.deepEqual(log, [
 //     "forward 1", "do1",
@@ -24,8 +24,8 @@ export async function testIndex() {
   const log2 = [];
   const r2 = new Revertable({ logger:(msg) => log2.push(msg) });
   r2
-    .push((log) => log("do1"), (log) => log("undo1"))
-    .push((log) => { log("do2"); throw new Error("fail"); }, (log) => log("undo2"));
+    .pushNamed("s1", (log) => log("do1"), "r1", (log) => log("undo1"))
+    .pushNamed("s2", (log) => { log("do2"); throw new Error("fail"); }, "r2", (log) => log("undo2"));
 
   const result2 = await r2.run();
 //   assert.strictEqual(result2, false);

@@ -22,13 +22,13 @@ export const revertable = (value, steps, fn, onError)=>{
     return Object.freeze(r);
 }
 
-export const attempt = (exec, attempts=3)=>{
+export const attempt = (exec, attemptCount=3, delay=2000)=>{
     let a = 1, e;
 
     while (true) {
         try { return exec(a); }
         catch(err) { e = err; }
-        if (a >= attempts) { throw e; }
+        if (a >= attemptCount) { throw e; }
         a ++;
     }
 }
