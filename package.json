@@ -1,6 +1,6 @@
 {
   "name": "@randajan/revert",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A minimalist utility for running sequential steps with automatic rollback on failure.",
   "repository": "randajan/revert",
   "type": "module",
