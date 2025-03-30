@@ -1,9 +1,11 @@
 // Converted to sync
 
 import { defaultLogFormat, verifyFn, verifyPassMode } from "../uni";
-import { revertable } from "./utils";
+import { revertable, attempt } from "./utils";
 
-export const wrapWithLogMsg = (passMode, msg, fn)=>{
+export { revertable, attempt }
+
+const wrapWithLogMsg = (passMode, msg, fn)=>{
     return (a1, a2, ...a)=>{
         (passMode === "omit" ? a1 : a2)(msg);
         return fn(a1, a2, ...a);
